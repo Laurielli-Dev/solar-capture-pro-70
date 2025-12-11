@@ -2,87 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Solar Energy Theme - Warm & Professional */
+    --background: 40 33% 98%;
+    --foreground: 220 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Solar Orange - Primary Brand Color */
+    --primary: 32 95% 52%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Sky Blue - Trust & Reliability */
+    --secondary: 210 60% 95%;
+    --secondary-foreground: 210 50% 30%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Green - Sustainability Accent */
+    --accent: 152 60% 92%;
+    --accent-foreground: 152 50% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 32 95% 52%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Custom Colors */
+    --solar-orange: 32 95% 52%;
+    --solar-orange-light: 36 100% 95%;
+    --solar-amber: 38 92% 60%;
+    --solar-yellow: 45 93% 58%;
+    --sky-blue: 210 80% 55%;
+    --sky-blue-light: 210 60% 95%;
+    --eco-green: 152 60% 45%;
+    --eco-green-light: 152 60% 92%;
+    --warm-gray: 30 10% 40%;
+
+    /* Gradients */
+    --gradient-solar: linear-gradient(135deg, hsl(var(--solar-orange)) 0%, hsl(var(--solar-amber)) 50%, hsl(var(--solar-yellow)) 100%);
+    --gradient-sky: linear-gradient(180deg, hsl(210 80% 55%) 0%, hsl(200 85% 65%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(40 33% 99%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 20% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 20% 15% / 0.1), 0 2px 4px -2px hsl(220 20% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(220 20% 15% / 0.1), 0 4px 6px -4px hsl(220 20% 15% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(220 20% 15% / 0.1), 0 8px 10px -6px hsl(220 20% 15% / 0.1);
+    --shadow-glow: 0 0 40px hsl(var(--solar-orange) / 0.3);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 20% 10%;
+    --foreground: 40 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 20% 13%;
+    --card-foreground: 40 20% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 20% 13%;
+    --popover-foreground: 40 20% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 32 95% 55%;
+    --primary-foreground: 220 20% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 30% 20%;
+    --secondary-foreground: 210 60% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 152 40% 20%;
+    --accent-foreground: 152 60% 85%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 32 95% 55%;
+
+    --solar-orange: 32 95% 55%;
+    --solar-orange-light: 32 50% 20%;
+    --solar-amber: 38 85% 55%;
+    --solar-yellow: 45 90% 55%;
+    --sky-blue: 210 75% 50%;
+    --sky-blue-light: 210 30% 20%;
+    --eco-green: 152 55% 40%;
+    --eco-green-light: 152 30% 20%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -100,6 +128,137 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .section-card {
+    @apply bg-card rounded-2xl p-6 md:p-8 shadow-md border border-border/50;
+    background: var(--gradient-card);
+  }
+
+  .section-header {
+    @apply flex items-center gap-3 mb-6 pb-4 border-b border-border/50;
+  }
+
+  .section-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center text-primary-foreground;
+    background: var(--gradient-solar);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .form-label {
+    @apply text-sm font-medium text-foreground mb-2 block;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary;
+    @apply transition-all duration-200 placeholder:text-muted-foreground;
+  }
+
+  .file-drop-zone {
+    @apply border-2 border-dashed border-border rounded-xl p-6;
+    @apply hover:border-primary/50 hover:bg-primary/5;
+    @apply transition-all duration-300 cursor-pointer;
+    @apply flex flex-col items-center justify-center gap-3 min-h-[160px];
+  }
+
+  .file-drop-zone.active {
+    @apply border-primary bg-primary/10;
+  }
+
+  .file-preview {
+    @apply relative rounded-lg overflow-hidden border border-border;
+    @apply hover:shadow-lg transition-shadow duration-200;
+  }
+
+  .beneficiary-card {
+    @apply bg-sky-blue-light/30 rounded-xl p-5 border border-sky-blue/20;
+    @apply hover:shadow-md transition-all duration-200;
+  }
+
+  .btn-solar {
+    @apply px-6 py-3 rounded-xl font-semibold text-primary-foreground;
+    @apply transition-all duration-300 transform hover:scale-[1.02];
+    background: var(--gradient-solar);
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+  }
+
+  .btn-solar:hover {
+    box-shadow: var(--shadow-lg), 0 0 60px hsl(var(--solar-orange) / 0.4);
+  }
+
+  .btn-solar:active {
+    transform: scale(0.98);
+  }
+
+  .checkbox-solar {
+    @apply w-5 h-5 rounded-md border-2 border-input;
+    @apply checked:bg-primary checked:border-primary;
+    @apply focus:ring-2 focus:ring-primary/30;
+    @apply transition-all duration-200 cursor-pointer;
+  }
+
+  .progress-bar {
+    @apply h-2 rounded-full bg-muted overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500;
+    background: var(--gradient-solar);
+  }
+}
+
+@layer utilities {
+  .bg-solar-gradient {
+    background: var(--gradient-solar);
+  }
+
+  .bg-sky-gradient {
+    background: var(--gradient-sky);
+  }
+
+  .text-solar {
+    background: var(--gradient-solar);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shadow-solar {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .animate-pulse-solar {
+    animation: pulse-solar 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-solar {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 }
