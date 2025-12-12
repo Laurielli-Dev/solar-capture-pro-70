@@ -748,12 +748,12 @@
       </div>
 
       <!-- Chart Card -->
-      <div class="card">
+      <div class="card" id="chartCard">
         <div class="card-header">
           <div class="card-icon">
             <i data-lucide="bar-chart-3"></i>
           </div>
-          <h2 class="card-title">Gráfico de Economia</h2>
+          <h2 class="card-title">Visão Geral da Economia</h2>
         </div>
         <div class="chart-container">
           <canvas id="economyChart"></canvas>
@@ -898,32 +898,46 @@
     }
 
     // Create/update chart
-    function updateChart(valorCom, valorSem, economia) {
+    function updateChart(valorCom, valorSem, economia12, economiaAcumulada) {
       const ctx = el('economyChart').getContext('2d');
 
       if (economyChart) {
         economyChart.destroy();
       }
 
+      // Build labels and data based on whether accumulated savings exist
+      const labels = ['SEM RendSolar', 'COM RendSolar', 'Economia 12 Meses'];
+      const data = [valorSem, valorCom, economia12];
+      const bgColors = [
+        'rgba(239, 68, 68, 0.85)',
+        'rgba(16, 185, 129, 0.85)',
+        'rgba(249, 115, 22, 0.85)'
+      ];
+      const borderColors = [
+        'rgba(239, 68, 68, 1)',
+        'rgba(16, 185, 129, 1)',
+        'rgba(249, 115, 22, 1)'
+      ];
+
+      // Add accumulated savings if exists
+      if (economiaAcumulada > 0) {
+        labels.push('Economia Acumulada');
+        data.push(economiaAcumulada);
+        bgColors.push('rgba(14, 165, 233, 0.85)');
+        borderColors.push('rgba(14, 165, 233, 1)');
+      }
+
       economyChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Sem RendSolar', 'Com RendSolar', 'Sua Economia'],
+          labels: labels,
           datasets: [{
             label: 'Valores (R$)',
-            data: [valorSem, valorCom, economia],
-            backgroundColor: [
-              'rgba(239, 68, 68, 0.8)',
-              'rgba(16, 185, 129, 0.8)',
-              'rgba(249, 115, 22, 0.8)'
-            ],
-            borderColor: [
-              'rgba(239, 68, 68, 1)',
-              'rgba(16, 185, 129, 1)',
-              'rgba(249, 115, 22, 1)'
-            ],
+            data: data,
+            backgroundColor: bgColors,
+            borderColor: borderColors,
             borderWidth: 2,
-            borderRadius: 8,
+            borderRadius: 10,
             borderSkipped: false,
           }]
         },
@@ -935,6 +949,11 @@
               display: false
             },
             tooltip: {
+              backgroundColor: 'rgba(31, 41, 55, 0.95)',
+              titleFont: { size: 14, weight: 'bold' },
+              bodyFont: { size: 13 },
+              padding: 12,
+              cornerRadius: 8,
               callbacks: {
                 label: function(context) {
                   return fmt(context.raw);
@@ -948,13 +967,17 @@
               ticks: {
                 callback: function(value) {
                   return 'R$ ' + value.toLocaleString('pt-BR');
-                }
+                },
+                font: { size: 11 }
               },
               grid: {
-                color: 'rgba(0, 0, 0, 0.05)'
+                color: 'rgba(0, 0, 0, 0.06)'
               }
             },
             x: {
+              ticks: {
+                font: { size: 11, weight: '600' }
+              },
               grid: {
                 display: false
               }
@@ -993,15 +1016,16 @@
       el("badgeText").textContent = badge.text;
 
       // Accumulated economy
+      let totalAcumulada = 0;
       if (el("temAcumulado").value === "sim") {
         const acum = parseFloat(el("economiaAcumulada").value) || 0;
-        const total = acum + economia;
-        el("economiaAcumuladaFinal").textContent = fmt(total);
+        totalAcumulada = acum + economia;
+        el("economiaAcumuladaFinal").textContent = fmt(totalAcumulada);
         el("boxAcumulada").classList.remove("hidden");
         
         // PDF
         el("pdfAcumuladaRow").classList.remove("hidden");
-        el("pdfAcumulada").textContent = fmt(total);
+        el("pdfAcumulada").textContent = fmt(totalAcumulada);
       } else {
         el("boxAcumulada").classList.add("hidden");
         el("pdfAcumuladaRow").classList.add("hidden");
@@ -1020,8 +1044,8 @@
       el("pdfEconomia12").textContent = fmt(economia * 12);
       el("pdfPorcentagem").textContent = porcentagem.toFixed(2) + '%';
 
-      // Update chart
-      updateChart(com, sem, economia);
+      // Update chart with new data: SEM, COM, 12 meses, acumulada (if any)
+      updateChart(com, sem, economia * 12, totalAcumulada);
 
       // Show results
       el("resultsSection").classList.remove("hidden");
@@ -1033,18 +1057,76 @@
       lucide.createIcons();
     }
 
-    // Download PDF
-    el("downloadPdf").addEventListener("click", () => {
-      const element = el("pdfContent");
+    // Download PDF with chart
+    el("downloadPdf").addEventListener("click", async () => {
+      // Create a container for PDF that includes chart
+      const pdfContainer = document.createElement('div');
+      pdfContainer.style.background = 'white';
+      pdfContainer.style.padding = '0';
+      pdfContainer.style.width = '100%';
+      
+      // Clone the receipt content
+      const receiptClone = el("pdfContent").cloneNode(true);
+      receiptClone.style.display = 'block';
+      pdfContainer.appendChild(receiptClone);
+      
+      // Add chart section
+      const chartSection = document.createElement('div');
+      chartSection.style.padding = '24px';
+      chartSection.style.background = 'white';
+      chartSection.innerHTML = `
+        <div style="text-align: center; margin-bottom: 16px;">
+          <h3 style="color: #1F2937; font-size: 18px; font-weight: 700; margin: 0;">📊 Visão Geral da Economia</h3>
+        </div>
+      `;
+      
+      // Convert chart to image
+      const chartCanvas = el('economyChart');
+      const chartImage = document.createElement('img');
+      chartImage.src = chartCanvas.toDataURL('image/png', 1.0);
+      chartImage.style.width = '100%';
+      chartImage.style.maxHeight = '300px';
+      chartImage.style.objectFit = 'contain';
+      chartSection.appendChild(chartImage);
+      
+      // Add footer
+      const footer = document.createElement('div');
+      footer.style.textAlign = 'center';
+      footer.style.padding = '20px';
+      footer.style.borderTop = '1px solid #E5E7EB';
+      footer.style.marginTop = '20px';
+      footer.innerHTML = `
+        <p style="color: #6B7280; font-size: 12px; margin: 0;">
+          ☀️ <strong>RendSolar</strong> - Energia solar para um futuro sustentável
+        </p>
+      `;
+      chartSection.appendChild(footer);
+      
+      pdfContainer.appendChild(chartSection);
+      
+      // Temporarily add to DOM for rendering
+      pdfContainer.style.position = 'absolute';
+      pdfContainer.style.left = '-9999px';
+      document.body.appendChild(pdfContainer);
+      
       const opt = {
-        margin: 10,
+        margin: 8,
         filename: 'comprovante-economia-rendsolar.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      html2pdf().set(opt).from(element).save();
+      try {
+        await html2pdf().set(opt).from(pdfContainer).save();
+      } finally {
+        document.body.removeChild(pdfContainer);
+      }
     });
 
     // New simulation
