@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador RendSolar - Economia de Energia</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- html2pdf.js para gerar PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-gradient-start: #FFF7ED;
+      --bg-gradient-end: #FEF3C7;
+      --card-bg: #FFFFFF;
+      --primary: #F97316;
+      --primary-dark: #EA580C;
+      --primary-light: #FDBA74;
+      --secondary: #0EA5E9;
+      --success: #10B981;
+      --success-light: #D1FAE5;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text-dark: #1F2937;
+      --text-muted: #6B7280;
+      --text-light: #9CA3AF;
+      --border: #E5E7EB;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --shadow-glow: 0 0 40px rgba(249,115,22,0.15);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      min-height: 100vh;
+      padding: 24px 16px;
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--warning) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg), var(--shadow-glow);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .logo-icon svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 20px;
+      border: 1px solid rgba(249,115,22,0.1);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: var(--card-bg);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-light);
+    }
+
+    /* Services List */
+    .services-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .service-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .service-row input {
+      flex: 1;
+    }
+
+    .btn-remove-service {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: #FEE2E2;
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-remove-service:hover {
+      background: #FECACA;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: var(--shadow-md), 0 0 20px rgba(249,115,22,0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), 0 0 30px rgba(249,115,22,0.4);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary-light);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(249,115,22,0.05);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Results */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .result-item {
+      background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .result-item.highlight {
+      background: linear-gradient(135deg, var(--success-light) 0%, #A7F3D0 100%);
+      border-color: var(--success);
+    }
+
+    .result-item.primary {
+      background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+      border-color: var(--primary-light);
+    }
+
+    .result-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .result-item.highlight .result-value {
+      color: var(--success);
+    }
+
+    .result-item.primary .result-value {
+      color: var(--primary);
+    }
+
+    /* Badge */
+    .badge-container {
+      display: flex;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    .economy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .badge-excelente {
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(16,185,129,0.4);
+    }
+
+    .badge-otima {
+      background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+    }
+
+    .badge-boa {
+      background: linear-gradient(135deg, var(--warning) 0%, #FBBF24 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+    }
+
+    .badge-regular {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(249,115,22,0.3);
+    }
+
+    .badge-baixa {
+      background: linear-gradient(135deg, var(--danger) 0%, #F87171 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+    }
+
+    /* Chart */
+    .chart-container {
+      position: relative;
+      height: 280px;
+      margin: 20px 0;
+    }
+
+    /* Comparison */
+    .comparison-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      margin: 24px 0;
+    }
+
+    .comparison-item {
+      text-align: center;
+      padding: 20px;
+      border-radius: var(--radius);
+    }
+
+    .comparison-item.without {
+      background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+    }
+
+    .comparison-item.with {
+      background: linear-gradient(135deg, var(--success-light) 0%, #A7F3D0 100%);
+    }
+
+    .comparison-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .comparison-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .comparison-item.without .comparison-value {
+      color: var(--danger);
+    }
+
+    .comparison-item.with .comparison-value {
+      color: var(--success);
+    }
+
+    .comparison-vs {
+      width: 48px;
+      height: 48px;
+      background: var(--card-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--text-muted);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Receipt Style */
+    .receipt {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .receipt-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .receipt-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .receipt-logo-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .receipt-logo-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .receipt-title {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .receipt-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .receipt-body {
+      padding: 24px;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .receipt-row:last-child {
+      border-bottom: none;
+    }
+
+    .receipt-row-label {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .receipt-row-value {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .receipt-total {
+      background: linear-gradient(135deg, var(--success-light) 0%, #A7F3D0 100%);
+      margin: 16px -24px -24px;
+      padding: 20px 24px;
+    }
+
+    .receipt-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .receipt-total-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .receipt-total-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--success);
+    }
+
+    /* Hidden sections */
+    .hidden {
+      display: none !important;
+    }
+
+    /* PDF Content */
+    #pdfContent {
+      background: white;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .comparison-container {
+        grid-template-columns: 1fr;
+      }
+
+      .comparison-vs {
+        display: none;
+      }
+
+      .results-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i data-lucide="sun"></i>
+        </div>
+        <span class="logo-text">RendSolar</span>
+      </div>
+      <p class="header-subtitle">Simulador de Economia em Energia Solar</p>
+    </header>
+
+    <!-- Form Card -->
+    <div class="card no-print">
+      <div class="card-header">
+        <div class="card-icon">
+          <i data-lucide="calculator"></i>
+        </div>
+        <h2 class="card-title">Dados do Consumo</h2>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="consumo">Consumo Final (kWh)</label>
+          <input id="consumo" type="number" value="500" step="0.01" placeholder="Ex: 500">
+        </div>
+
+        <div class="form-group">
+          <label for="valorInjetada">Tarifa RendSolar (R$/kWh)</label>
+          <input id="valorInjetada" type="number" value="0.88" step="0.0001" placeholder="Ex: 0.88">
+        </div>
+
+        <div class="form-group">
+          <label for="valorEnergisa">Tarifa Energisa (R$/kWh)</label>
+          <input id="valorEnergisa" type="number" value="1.15401" step="0.0001" placeholder="Ex: 1.15401">
+        </div>
+
+        <div class="form-group">
+          <label for="temAcumulado">Possui economia acumulada?</label>
+          <select id="temAcumulado">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="acumuladoGroup">
+          <label for="economiaAcumulada">Economia Acumulada (R$)</label>
+          <input id="economiaAcumulada" type="number" value="0" step="0.01" placeholder="Ex: 150.00">
+        </div>
+
+        <div class="form-group full-width">
+          <label>Outros Serviços (R$)</label>
+          <div class="services-container" id="servicesList">
+            <div class="service-row">
+              <input class="service" type="number" value="0" step="0.01" placeholder="Valor do serviço">
+            </div>
+          </div>
+          <button id="addService" class="btn btn-ghost" style="margin-top: 12px;">
+            <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+            Adicionar Serviço
+          </button>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="calcular" class="btn btn-primary">
+          <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
+          Calcular Economia
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="hidden">
+
+      <!-- Comparison Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i data-lucide="scale"></i>
+          </div>
+          <h2 class="card-title">Comparativo de Valores</h2>
+        </div>
+
+        <div class="comparison-container">
+          <div class="comparison-item without">
+            <div class="comparison-label">Sem RendSolar</div>
+            <div class="comparison-value" id="valorSem">R$ 0,00</div>
+          </div>
+          <div class="comparison-vs">VS</div>
+          <div class="comparison-item with">
+            <div class="comparison-label">Com RendSolar</div>
+            <div class="comparison-value" id="valorCom">R$ 0,00</div>
+          </div>
+        </div>
+
+        <!-- Badge -->
+        <div class="badge-container">
+          <div class="economy-badge" id="economyBadge">
+            <i data-lucide="award" style="width: 20px; height: 20px;"></i>
+            <span id="badgeText">Economia</span>
+          </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="results-grid">
+          <div class="result-item highlight">
+            <div class="result-label">Economia do Mês</div>
+            <div class="result-value" id="economia">R$ 0,00</div>
+          </div>
+          <div class="result-item primary">
+            <div class="result-label">Porcentagem</div>
+            <div class="result-value" id="porcentagem">0%</div>
+          </div>
+          <div class="result-item highlight">
+            <div class="result-label">Economia em 12 Meses</div>
+            <div class="result-value" id="economia12">R$ 0,00</div>
+          </div>
+          <div class="result-item hidden" id="boxAcumulada">
+            <div class="result-label">Economia Acumulada</div>
+            <div class="result-value" id="economiaAcumuladaFinal">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i data-lucide="bar-chart-3"></i>
+          </div>
+          <h2 class="card-title">Gráfico de Economia</h2>
+        </div>
+        <div class="chart-container">
+          <canvas id="economyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Receipt Card (for PDF) -->
+      <div class="card" id="pdfContent">
+        <div class="receipt">
+          <div class="receipt-header">
+            <div class="receipt-logo">
+              <div class="receipt-logo-icon">
+                <i data-lucide="sun"></i>
+              </div>
+              <span class="receipt-title">RendSolar</span>
+            </div>
+            <div class="receipt-subtitle">Comprovante de Economia em Energia Solar</div>
+          </div>
+          <div class="receipt-body">
+            <div class="receipt-row">
+              <span class="receipt-row-label">Data da Simulação</span>
+              <span class="receipt-row-value" id="pdfDate">--/--/----</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Consumo</span>
+              <span class="receipt-row-value" id="pdfConsumo">0 kWh</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Tarifa RendSolar</span>
+              <span class="receipt-row-value" id="pdfTarifaRend">R$ 0,00/kWh</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Tarifa Energisa</span>
+              <span class="receipt-row-value" id="pdfTarifaEne">R$ 0,00/kWh</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Outros Serviços</span>
+              <span class="receipt-row-value" id="pdfServicos">R$ 0,00</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Valor SEM RendSolar</span>
+              <span class="receipt-row-value" style="color: #EF4444;" id="pdfSem">R$ 0,00</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Valor COM RendSolar</span>
+              <span class="receipt-row-value" style="color: #10B981;" id="pdfCom">R$ 0,00</span>
+            </div>
+            <div class="receipt-row">
+              <span class="receipt-row-label">Economia em 12 Meses</span>
+              <span class="receipt-row-value" id="pdfEconomia12">R$ 0,00</span>
+            </div>
+            <div class="receipt-row hidden" id="pdfAcumuladaRow">
+              <span class="receipt-row-label">Economia Acumulada</span>
+              <span class="receipt-row-value" id="pdfAcumulada">R$ 0,00</span>
+            </div>
+            <div class="receipt-total">
+              <div class="receipt-total-row">
+                <span class="receipt-total-label">💰 Economia do Mês</span>
+                <span class="receipt-total-value" id="pdfEconomia">R$ 0,00</span>
+              </div>
+              <div style="text-align: center; margin-top: 8px; font-size: 14px; color: #059669;">
+                <span id="pdfPorcentagem">0%</span> de economia
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download Button -->
+      <div class="btn-group no-print" style="justify-content: center;">
+        <button id="downloadPdf" class="btn btn-success">
+          <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+          Baixar Comprovante PDF
+        </button>
+        <button id="newSimulation" class="btn btn-ghost">
+          <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
+          Nova Simulação
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer no-print">
+      <div class="footer-brand">
+        <i data-lucide="sun" style="width: 16px; height: 16px; color: var(--primary);"></i>
+        <strong>RendSolar</strong>
+      </div>
+      <p>Energia solar para um futuro sustentável</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Utility functions
+    const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmtNum = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    const el = (id) => document.getElementById(id);
+
+    // Chart instance
+    let economyChart = null;
+
+    // Toggle accumulated economy field
+    el("temAcumulado").addEventListener("change", () => {
+      if (el("temAcumulado").value === "sim") {
+        el("acumuladoGroup").classList.remove("hidden");
+      } else {
+        el("acumuladoGroup").classList.add("hidden");
+      }
+    });
+
+    // Add service
+    el("addService").addEventListener("click", () => {
+      const div = document.createElement("div");
+      div.className = "service-row";
+      div.innerHTML = `
+        <input class="service" type="number" step="0.01" value="0" placeholder="Valor do serviço">
+        <button class="btn-remove-service" onclick="this.parentElement.remove()">
+          <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+        </button>
+      `;
+      el("servicesList").appendChild(div);
+      lucide.createIcons();
+    });
+
+    // Get economy badge class and text
+    function getEconomyBadge(percentage) {
+      if (percentage >= 25) {
+        return { class: 'badge-excelente', text: 'Excelente Economia!' };
+      } else if (percentage >= 20) {
+        return { class: 'badge-otima', text: 'Ótima Economia!' };
+      } else if (percentage >= 15) {
+        return { class: 'badge-boa', text: 'Boa Economia!' };
+      } else if (percentage >= 10) {
+        return { class: 'badge-regular', text: 'Economia Regular' };
+      } else {
+        return { class: 'badge-baixa', text: 'Economia Baixa' };
+      }
+    }
+
+    // Create/update chart
+    function updateChart(valorCom, valorSem, economia) {
+      const ctx = el('economyChart').getContext('2d');
+
+      if (economyChart) {
+        economyChart.destroy();
+      }
+
+      economyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Sem RendSolar', 'Com RendSolar', 'Sua Economia'],
+          datasets: [{
+            label: 'Valores (R$)',
+            data: [valorSem, valorCom, economia],
+            backgroundColor: [
+              'rgba(239, 68, 68, 0.8)',
+              'rgba(16, 185, 129, 0.8)',
+              'rgba(249, 115, 22, 0.8)'
+            ],
+            borderColor: [
+              'rgba(239, 68, 68, 1)',
+              'rgba(16, 185, 129, 1)',
+              'rgba(249, 115, 22, 1)'
+            ],
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return fmt(context.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return 'R$ ' + value.toLocaleString('pt-BR');
+                }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Calculate function
+    function calcular() {
+      const consumo = parseFloat(el("consumo").value) || 0;
+      const valInj = parseFloat(el("valorInjetada").value) || 0;
+      const valEne = parseFloat(el("valorEnergisa").value) || 0;
+
+      const servicos = [...document.querySelectorAll(".service")].reduce(
+        (acc, i) => acc + (parseFloat(i.value) || 0), 0
+      );
+
+      const com = consumo * valInj + servicos;
+      const sem = consumo * valEne + servicos;
+      const economia = sem - com;
+      const porcentagem = sem > 0 ? (economia / sem) * 100 : 0;
+
+      // Update results
+      el("valorCom").textContent = fmt(com);
+      el("valorSem").textContent = fmt(sem);
+      el("economia").textContent = fmt(economia);
+      el("porcentagem").textContent = porcentagem.toFixed(2) + "%";
+      el("economia12").textContent = fmt(economia * 12);
+
+      // Update badge
+      const badge = getEconomyBadge(porcentagem);
+      const badgeEl = el("economyBadge");
+      badgeEl.className = "economy-badge " + badge.class;
+      el("badgeText").textContent = badge.text;
+
+      // Accumulated economy
+      if (el("temAcumulado").value === "sim") {
+        const acum = parseFloat(el("economiaAcumulada").value) || 0;
+        const total = acum + economia;
+        el("economiaAcumuladaFinal").textContent = fmt(total);
+        el("boxAcumulada").classList.remove("hidden");
+        
+        // PDF
+        el("pdfAcumuladaRow").classList.remove("hidden");
+        el("pdfAcumulada").textContent = fmt(total);
+      } else {
+        el("boxAcumulada").classList.add("hidden");
+        el("pdfAcumuladaRow").classList.add("hidden");
+      }
+
+      // Update PDF content
+      const now = new Date();
+      el("pdfDate").textContent = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      el("pdfConsumo").textContent = fmtNum(consumo) + ' kWh';
+      el("pdfTarifaRend").textContent = 'R$ ' + fmtNum(valInj) + '/kWh';
+      el("pdfTarifaEne").textContent = 'R$ ' + fmtNum(valEne) + '/kWh';
+      el("pdfServicos").textContent = fmt(servicos);
+      el("pdfSem").textContent = fmt(sem);
+      el("pdfCom").textContent = fmt(com);
+      el("pdfEconomia").textContent = fmt(economia);
+      el("pdfEconomia12").textContent = fmt(economia * 12);
+      el("pdfPorcentagem").textContent = porcentagem.toFixed(2) + '%';
+
+      // Update chart
+      updateChart(com, sem, economia);
+
+      // Show results
+      el("resultsSection").classList.remove("hidden");
+
+      // Scroll to results
+      el("resultsSection").scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Reinitialize icons
+      lucide.createIcons();
+    }
+
+    // Download PDF
+    el("downloadPdf").addEventListener("click", () => {
+      const element = el("pdfContent");
+      const opt = {
+        margin: 10,
+        filename: 'comprovante-economia-rendsolar.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    });
+
+    // New simulation
+    el("newSimulation").addEventListener("click", () => {
+      el("resultsSection").classList.add("hidden");
+      el("consumo").value = 500;
+      el("valorInjetada").value = 0.88;
+      el("valorEnergisa").value = 1.15401;
+      el("temAcumulado").value = "nao";
+      el("acumuladoGroup").classList.add("hidden");
+      el("economiaAcumulada").value = 0;
+      
+      // Reset services
+      el("servicesList").innerHTML = `
+        <div class="service-row">
+          <input class="service" type="number" value="0" step="0.01" placeholder="Valor do serviço">
+        </div>
+      `;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Calculate button
+    el("calcular").addEventListener("click", calcular);
+  </script>
+</body>
+</html>
